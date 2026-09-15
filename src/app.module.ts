@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { PropertiesModule } from './modules/properties/properties.module';
+import { UnitsModule } from './modules/units/units.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -29,6 +31,10 @@ import configuration from './config/configuration';
         logging: ['error', 'warn'],
       }),
     }),
+
+    PropertiesModule,
+
+    UnitsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
