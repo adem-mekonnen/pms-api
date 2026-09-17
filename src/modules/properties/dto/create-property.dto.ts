@@ -11,10 +11,10 @@ import {
 import { PropertyType } from '../entities/property.entity';
 
 export class CreatePropertyDto {
-  // BRD BR-ORG-01: Multi-tenancy key
+  // Now optional from the client because @CurrentOrg() injects it from the JWT
   @IsUUID()
-  @IsNotEmpty()
-  organizationId: string;
+  @IsOptional()
+  organizationId?: string;
 
   @IsString()
   @IsNotEmpty()

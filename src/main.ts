@@ -3,19 +3,27 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from '@/app.module';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor'; // 1. Added
+import { GlobalHttpExceptionFilter } from './common/filters/http-exception.filter';   // 2. Added
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // BRD Section 44.12: Namespace all routes to /api/v1
+  // BRD Section 44.12: Global prefix
   app.setGlobalPrefix('api/v1');
 
-  // Enterprise Security: Global Validation & Sanitization Pipeline
+  // 3. Put on the Gift Wrapper for all successful responses
+  app.useGlobalInterceptors(new TransformInterceptor());
+
+  // 4. Put on the Gentle Guard to catch all errors
+  app.useGlobalFilters(new GlobalHttpExceptionFilter());
+
+  // 5. Input Validation & Whitelisting
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Strips away any properties that do not have decorators in the DTO
-      forbidNonWhitelisted: true, // Rejects requests with unknown properties (400 Bad Request)
-      transform: true, // Automatically transforms payloads to match DTO instance types
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 

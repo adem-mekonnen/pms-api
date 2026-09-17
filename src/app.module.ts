@@ -6,6 +6,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PropertiesModule } from './modules/properties/properties.module';
 import { UnitsModule } from './modules/units/units.module';
+import { TenantsModule } from './modules/tenants/tenants.module';
+import { LeasesModule } from './modules/leases/leases.module';
+import { InvoicesModule } from './modules/invoices/invoices.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -35,6 +41,18 @@ import configuration from './config/configuration';
     PropertiesModule,
 
     UnitsModule,
+
+    TenantsModule,
+
+    LeasesModule,
+
+    InvoicesModule,
+
+    PaymentsModule,
+
+    UsersModule,
+
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
