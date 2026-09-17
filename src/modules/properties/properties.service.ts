@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { Property, PropertyStatus } from './entities/property.entity';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
+import { PaginationDto } from '../../common/dto/pagination.dto'; // 1. Added import
 
 @Injectable()
 export class PropertiesService {
@@ -18,12 +19,32 @@ export class PropertiesService {
     return await this.propertyRepository.save(property);
   }
 
-  async findAll(organizationId: string): Promise<Property[]> {
-    // Multi-tenant isolation: Always filter by organizationId (BR-ORG-01)
-    return await this.propertyRepository.find({
+  // 2. Updated findAll with server-side pagination (Section 44.12)
+  async findAll(organizationId: string, paginationDto: PaginationDto) {
+    const { page = 1, limit = 10 } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    // findAndCount queries the database once and returns: [items, totalCount]
+    const [items, totalItems] = await this.propertyRepository.findAndCount({
       where: { organizationId, status: PropertyStatus.ACTIVE },
       order: { createdAt: 'DESC' },
+      skip,
+      take: limit,
     });
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      items,
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+    };
   }
 
   async findOne(id: string, organizationId: string): Promise<Property> {

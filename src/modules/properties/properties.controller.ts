@@ -6,26 +6,34 @@ import {
   Body,
   Patch,
   Param,
+  Query,
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentOrg } from '../../common/decorators/current-org.decorator';
 
-@UseGuards(JwtAuthGuard) // 1. Enforces authentication on all property endpoints
+// Clean Enterprise Path Aliases (@common/*)
+import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
+import { CurrentOrg } from '@common/decorators/current-org.decorator';
+import { PaginationDto } from '@common/dto/pagination.dto';
+import { PermissionsGuard } from '@common/guards/permissions.guard';
+import { RequirePermissions } from '@common/decorators/permissions.decorator';
+import { Permission } from '@common/enums/permissions.enum';
+
+// Authentication & Dynamic RBAC active
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('properties')
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
 
   @Post()
+  @RequirePermissions(Permission.PROPERTY_CREATE)
   create(
     @CurrentOrg() organizationId: string,
     @Body() createPropertyDto: CreatePropertyDto,
   ) {
-    // 2. Automatically injects the verified organizationId from the JWT
     return this.propertiesService.create({
       ...createPropertyDto,
       organizationId,
@@ -33,12 +41,16 @@ export class PropertiesController {
   }
 
   @Get()
-  findAll(@CurrentOrg() organizationId: string) {
-    // 3. No query parameter needed; user only sees their own organization's properties
-    return this.propertiesService.findAll(organizationId);
+  @RequirePermissions(Permission.PROPERTY_VIEW)
+  findAll(
+    @CurrentOrg() organizationId: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.propertiesService.findAll(organizationId, paginationDto);
   }
 
   @Get(':id')
+  @RequirePermissions(Permission.PROPERTY_VIEW)
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentOrg() organizationId: string,
@@ -47,6 +59,7 @@ export class PropertiesController {
   }
 
   @Patch(':id')
+  @RequirePermissions(Permission.PROPERTY_UPDATE)
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentOrg() organizationId: string,
@@ -56,6 +69,7 @@ export class PropertiesController {
   }
 
   @Patch(':id/archive')
+  @RequirePermissions(Permission.PROPERTY_UPDATE)
   archive(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentOrg() organizationId: string,
