@@ -13,7 +13,9 @@ import {
   Unique,
   VersionColumn,
 } from 'typeorm';
-import { Lease } from '../../leases/entities/lease.entity';
+
+// Clean Enterprise Alias
+import { Lease } from '@modules/leases/entities/lease.entity';
 
 // 1. ENUMS FIRST
 export enum InvoiceStatus {
@@ -32,8 +34,9 @@ export enum InvoiceItemType {
   LATE_FEE = 'LATE_FEE',
 }
 
-// 2. PARENT ENTITY (INVOICE)
+// 2. PARENT ENTITY (AGGREGATE ROOT)
 @Entity('invoices')
+// Section 44.5: Idempotency constraint - prevents duplicate billing for the same period
 @Unique('UQ_lease_billing_period', ['leaseId', 'billingPeriodStart', 'billingPeriodEnd'])
 export class Invoice {
   @PrimaryGeneratedColumn('uuid')
@@ -85,7 +88,6 @@ export class Invoice {
   })
   status: InvoiceStatus;
 
-  // TypeScript emits 'Array' for items, so it does not need InvoiceItem initialized yet!
   @OneToMany(() => InvoiceItem, (item) => item.invoice, { cascade: true })
   items: InvoiceItem[];
 
@@ -102,7 +104,7 @@ export class Invoice {
   deletedAt?: Date;
 }
 
-// 3. CHILD ENTITY (INVOICE ITEM) - Defined second, so Invoice is already in memory!
+// 3. CHILD ENTITY (LINE ITEM)
 @Entity('invoice_items')
 export class InvoiceItem {
   @PrimaryGeneratedColumn('uuid')

@@ -12,8 +12,10 @@ import {
   InvoiceStatus,
   InvoiceItem,
   InvoiceItemType,
-} from './entities/invoice.entity'; //  All imported from invoice.entity
-import { Lease, LeaseStatus } from '../leases/entities/lease.entity';
+} from './entities/invoice.entity';
+
+// Clean Enterprise Alias
+import { Lease, LeaseStatus } from '@modules/leases/entities/lease.entity';
 
 @Injectable()
 export class InvoicesService {
