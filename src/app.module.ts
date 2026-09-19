@@ -12,6 +12,7 @@ import { InvoicesModule } from './modules/invoices/invoices.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -53,6 +54,8 @@ import configuration from './config/configuration';
     UsersModule,
 
     AuthModule,
+
+    MaintenanceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
