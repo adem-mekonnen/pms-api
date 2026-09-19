@@ -13,6 +13,8 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { MaintenanceModule } from './modules/maintenance/maintenance.module';
+import { ReportsModule } from './modules/reports/reports.module';
+import { AuditModule } from './modules/audit/audit.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -56,6 +58,10 @@ import configuration from './config/configuration';
     AuthModule,
 
     MaintenanceModule,
+
+    ReportsModule,
+
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -7,10 +7,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { Lease, LeaseStatus } from './entities/lease.entity';
-import { Unit, UnitStatus } from '../units/entities/unit.entity';
-import { Tenant } from '../tenants/entities/tenant.entity';
-import { CreateLeaseDto } from './dto/create-lease.dto';
+
+// Clean Enterprise Path Aliases (@modules/*)
+import { Lease, LeaseStatus } from '@modules/leases/entities/lease.entity';
+import { Unit, UnitStatus } from '@modules/units/entities/unit.entity';
+import { Tenant } from '@modules/tenants/entities/tenant.entity';
+import { CreateLeaseDto } from '@modules/leases/dto/create-lease.dto';
+import { AuditService } from '@modules/audit/audit.service'; // 1. Imported AuditService
 
 @Injectable()
 export class LeasesService {
@@ -21,6 +24,7 @@ export class LeasesService {
     private readonly unitRepository: Repository<Unit>,
     @InjectRepository(Tenant)
     private readonly tenantRepository: Repository<Tenant>,
+    private readonly auditService: AuditService, // 2. Injected AuditService
   ) {}
 
   async create(createLeaseDto: CreateLeaseDto): Promise<Lease> {
@@ -93,7 +97,22 @@ export class LeasesService {
 
     // Set lease to ACTIVE
     lease.status = LeaseStatus.ACTIVE;
-    return await this.leaseRepository.save(lease);
+    const savedLease = await this.leaseRepository.save(lease);
+
+    // 3. Record Immutable Audit Log (FR-AUD-001, Section 33)
+    await this.auditService.logAction({
+      organizationId,
+      action: 'LEASE_ACTIVATED',
+      entity: 'Lease',
+      entityId: savedLease.id,
+      afterState: {
+        status: savedLease.status,
+        monthlyRent: savedLease.monthlyRent,
+        unitsCovered: savedLease.units.map((u) => u.code),
+      },
+    });
+
+    return savedLease;
   }
 
   async findOne(id: string, organizationId: string): Promise<Lease> {

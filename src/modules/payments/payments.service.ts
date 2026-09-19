@@ -13,6 +13,7 @@ import { Payment, PaymentMethod, PaymentStatus } from '@modules/payments/entitie
 import { Invoice, InvoiceStatus } from '@modules/invoices/entities/invoice.entity';
 import { RecordManualPaymentDto } from '@modules/payments/dto/record-manual-payment.dto';
 import { ChapaService } from '@modules/payments/chapa.service';
+import { AuditService } from '@modules/audit/audit.service';
 
 @Injectable()
 export class PaymentsService {
@@ -20,6 +21,7 @@ export class PaymentsService {
     private readonly dataSource: DataSource,
     private readonly chapaService: ChapaService,
     private readonly configService: ConfigService,
+    private readonly auditService: AuditService,
   ) {}
 
   // 1. Manual Cash / Bank Transfer Payment (ACID Transaction)
@@ -74,6 +76,20 @@ export class PaymentsService {
       invoice.amountPaid = newAmountPaid;
       invoice.status = remainingBalance === 0 ? InvoiceStatus.PAID : InvoiceStatus.PARTIALLY_PAID;
       await manager.save(Invoice, invoice);
+
+      // Stamping Immutable Audit Log (BR-AUD-01, Section 33)
+      await this.auditService.logAction({
+        organizationId: dto.organizationId,
+        action: 'MANUAL_PAYMENT_RECORDED',
+        entity: 'Payment',
+        entityId: payment.id,
+        afterState: {
+          amount: dto.amount,
+          method: dto.method,
+          invoiceNumber: invoice.invoiceNumber,
+          remainingBalance,
+        },
+      });
 
       return {
         payment,
@@ -215,6 +231,20 @@ export class PaymentsService {
         invoice.status = InvoiceStatus.PAID;
       }
       await manager.save(Invoice, invoice);
+
+      // Stamping Immutable Audit Log for Online Chapa Payment (BR-AUD-01, Section 33)
+      await this.auditService.logAction({
+        organizationId: invoice.organizationId,
+        action: 'CHAPA_PAYMENT_VERIFIED',
+        entity: 'Payment',
+        entityId: payment.id,
+        afterState: {
+          amount: verifiedAmount,
+          txRef,
+          invoiceNumber: invoice.invoiceNumber,
+          invoiceStatus: invoice.status,
+        },
+      });
 
       return {
         success: true,

@@ -1,6 +1,6 @@
 // src/common/enums/permissions.enum.ts
 export enum Permission {
-  // Organizations
+  // Organizations (BRD Section 19.2)
   ORG_VIEW = 'ORG_VIEW',
   ORG_UPDATE = 'ORG_UPDATE',
 
@@ -13,6 +13,10 @@ export enum Permission {
   ROLE_CREATE = 'ROLE_CREATE',
   ROLE_UPDATE = 'ROLE_UPDATE',
   ROLE_DELETE = 'ROLE_DELETE',
+
+  // Payment Configuration
+  PAYMENT_CONFIG_VIEW = 'PAYMENT_CONFIG_VIEW',
+  PAYMENT_CONFIG_UPDATE = 'PAYMENT_CONFIG_UPDATE',
 
   // Properties & Units
   PROPERTY_VIEW = 'PROPERTY_VIEW',
@@ -34,15 +38,34 @@ export enum Permission {
   LEASE_UPDATE = 'LEASE_UPDATE',
   LEASE_ACTIVATE = 'LEASE_ACTIVATE',
   LEASE_TERMINATE = 'LEASE_TERMINATE',
+  LEASE_APPROVE = 'LEASE_APPROVE',
 
-  // Financial & Payments
+  // Financial & Invoices
   INVOICE_VIEW = 'INVOICE_VIEW',
   INVOICE_EXPORT = 'INVOICE_EXPORT',
+
+  // Payments
   PAYMENT_VIEW = 'PAYMENT_VIEW',
   PAYMENT_CREATE = 'PAYMENT_CREATE',
   PAYMENT_RECONCILE = 'PAYMENT_RECONCILE',
-  // Maintenance (BRD Section 44.6.1)
+
+  // Maintenance (FR-MNT)
   MAINTENANCE_VIEW = 'MAINTENANCE_VIEW',
   MAINTENANCE_CREATE = 'MAINTENANCE_CREATE',
   MAINTENANCE_UPDATE = 'MAINTENANCE_UPDATE',
+
+  // Reports & Analytics (FR-RPT, Section 28 & 44.6.1)
+  REPORT_VIEW = 'REPORT_VIEW',
+  REPORT_EXPORT = 'REPORT_EXPORT',
+
+  // Audit Logs (FR-AUD, Section 33)
+  AUDIT_VIEW = 'AUDIT_VIEW',
+
+  // Data Imports (FR-IMP, Section 29)
+  IMPORT_CREATE = 'IMPORT_CREATE',
+  IMPORT_VIEW = 'IMPORT_VIEW',
+
+  // SaaS Subscriptions (FR-SUB, Section 26)
+  SUBSCRIPTION_VIEW = 'SUBSCRIPTION_VIEW',
+  SUBSCRIPTION_MANAGE = 'SUBSCRIPTION_MANAGE',
 }
